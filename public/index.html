@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ANDrios Chat</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="background"></div>
+
+<!-- ÜST KISIM -->
+<div id="header">
+    <div id="clock">00:00</div>
+    <div id="onlineCount">Online: 0</div>
+</div>
+
+<!-- AVATAR & İSİM SEÇİM EKRANI -->
+<div id="loginScreen" class="screen active">
+    <h1>Avatar Seçin</h1>
+    <div id="avatarList"></div>
+    <input id="usernameInput" type="text" placeholder="İsminizi yazın" />
+    <button id="btnLogin">Devam</button>
+</div>
+
+<!-- MENÜ -->
+<div id="mainMenu" class="screen hidden">
+    <button id="btnCreateRoom">Oda Oluştur</button>
+    <button id="btnJoinRoom">Odaya Gir</button>
+</div>
+
+<!-- ODA OLUŞTUR -->
+<div id="createRoomScreen" class="screen hidden">
+    <h2>Oda Oluştur</h2>
+    <input id="roomNameInput" type="text" placeholder="Oda Adı" />
+    <input id="roomPinInput" type="password" placeholder="PIN (Zorunlu)" />
+    <button id="btnCreateRoomConfirm">Odayı Oluştur</button>
+    <button class="btnBack">Geri</button>
+</div>
+
+<!-- ODAYA GİR -->
+<div id="joinRoomScreen" class="screen hidden">
+    <h2>Odaya Gir</h2>
+    <input id="joinRoomNameInput" type="text" placeholder="Oda Adı" />
+    <input id="joinRoomPinInput" type="password" placeholder="PIN" />
+    <button id="btnJoinRoomConfirm">Giriş Yap</button>
+    <button class="btnBack">Geri</button>
+</div>
+
+<!-- CHAT -->
+<div id="chatScreen" class="screen hidden">
+    <div id="chatHeader">
+        <span id="chatRoomName"></span>
+        <button id="btnLeaveRoom">Çık</button>
+    </div>
+    <div id="chatMainArea">
+        <div id="messages"></div>
+        <div id="userPanel">
+            <h4>Online Kullanıcılar</h4>
+            <div id="onlineUsers"></div>
+        </div>
+    </div>
+    <div id="typingStatus"></div>
+    <div id="chatInputArea">
+        <input id="messageInput" type="text" placeholder="Mesaj yazın..." autocomplete="off" />
+        <button id="btnSendMessage">Gönder</button>
+        <!-- Ses kaydı butonu JS tarafında eklenecek -->
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  // Firebase SDK'ları istersen buraya import edebilirsin
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDMyIPNR5uKBVgLd_0kik3pCiZVg-4efHg",
+    authDomain: "andrios-simple.firebaseapp.com",
+    projectId: "andrios-simple",
+    storageBucket: "andrios-simple.firebasestorage.app",
+    messagingSenderId: "81859499344",
+    appId: "1:81859499344:web:50cfc5d24bf5e78b1d0855"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
+  // Firebase ile ilgili fonksiyonları burada kullanabilirsin
+</script>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

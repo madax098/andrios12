@@ -1,0 +1,206 @@
+/* GENEL */
+body, html {
+    margin: 0; 
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #eee;
+}
+
+/* ARKA PLAN BLUR */
+#background {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    backdrop-filter: blur(6px);
+    z-index: -1;
+}
+
+/* ÜST KISIM */
+#header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 4px #000;
+}
+
+/* AVATAR SEÇİM */
+#avatarList {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+#avatarList span {
+    font-size: 36px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+}
+
+#avatarList span.selected {
+    box-shadow: 0 0 10px 3px #4caf50;
+    transform: scale(1.2);
+}
+
+/* EKRANLAR */
+.screen {
+    position: absolute;
+    top: 70px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: rgba(0,0,0,0.6);
+    padding: 20px;
+    border-radius: 15px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.screen.active {
+    display: flex;
+}
+
+.screen.hidden {
+    display: none !important;
+}
+
+/* Başlıklar */
+.screen h1, .screen h2 {
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+/* BUTONLAR */
+button {
+    cursor: pointer;
+    background: #4caf50;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+/* CHAT EKRANI */
+#chatScreen {
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: calc(100% - 60px);
+    width: 90%;
+    max-width: 800px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+#chatHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    color: #fff;
+    border-bottom: 1px solid #555;
+    font-weight: bold;
+}
+
+#chatMainArea {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+#messages {
+    flex: 3;
+    padding: 15px;
+    overflow-y: auto;
+    color: white;
+    border-right: 1px solid #555;
+    word-wrap: break-word;
+}
+
+#userPanel {
+    flex: 1;
+    padding: 15px;
+    color: #eee;
+    overflow-y: auto;
+}
+
+#userPanel h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #4caf50;
+    padding-bottom: 5px;
+}
+
+#onlineUsers {
+    font-size: 14px;
+}
+
+#typingStatus {
+    height: 25px;
+    padding: 0 20px;
+    color: #ccc;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* CHAT INPUT */
+#chatInputArea {
+    display: flex;
+    padding: 10px 20px;
+    border-top: 1px solid #555;
+}
+
+#messageInput {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+}
+
+#btnSendMessage {
+    margin-left: 10px;
+}
+
+/* Geri Butonu */
+.btnBack {
+    margin-top: 10px;
+    background: #f44336;
+}
+
+/* Inputlar */
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 8px;
+}
+
+/* Online Kullanıcı sayısı */
+#onlineCount {
+    font-weight: 600;
+}
+
+/* Saat */
+#clock {
+    font-weight: 600;
+}
