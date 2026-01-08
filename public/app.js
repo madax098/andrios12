@@ -1,10 +1,11 @@
 import { io } from "https://cdn.socket.io/4.7.1/socket.io.esm.min.js";
 
-// *** EN ÖNEMLİ SATIR ***
+// *** EN ÖNEMLİ SATIR — Render için DÜZELTİLDİ ***
 const socket = io("https://andrios12.onrender.com", {
-    transports: ["websocket"]
+    transports: ["websocket"],
+    path: "/socket.io"
 });
-// *************************
+// ***************************************
 
 let selectedAvatar = null;
 let username = null;
