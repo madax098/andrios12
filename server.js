@@ -5,6 +5,7 @@ const { Server } = require("socket.io");
 const app = express();
 const server = createServer(app);
 
+// Socket.io ayarları (Render için gerekli)
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -12,35 +13,27 @@ const io = new Server(server, {
     }
 });
 
+// Render PORT düzeltmesi (EN ÖNEMLİ KISIM)
 const PORT = process.env.PORT || 3000;
 
+// Tüm odalar
 const rooms = {};
 
-// Kullanıcıları güncelle
+// Odadaki kullanıcıları güncelle
 function updateRoomUsers(roomName) {
     const room = rooms[roomName];
     if (!room) return;
 
-    const users = Object.values(room.users).map((u) => u.username);
+    const users = Object.values(room.users).map(u => u.username);
 
     io.to(roomName).emit("onlineUsers", users);
     io.to(roomName).emit("onlineCount", users.length);
 }
 
-// Kullanıcının bağlı olduğu odayı bul
-function findUserRoom(socketId) {
-    for (const roomName in rooms) {
-        if (rooms[roomName].users[socketId]) {
-            return roomName;
-        }
-    }
-    return null;
-}
-
 // Statik dosyalar
 app.use(express.static("public"));
 
-// SOCKET BAĞLANTI
+// Socket bağlantısı
 io.on("connection", (socket) => {
     console.log("Yeni kullanıcı bağlandı:", socket.id);
 
@@ -75,7 +68,6 @@ io.on("connection", (socket) => {
     socket.on("joinRoom", ({ roomName, pin, username, avatar }, callback) => {
         const room = rooms[roomName];
         if (!room) return callback({ error: "Oda bulunamadı!" });
-
         if (room.pin !== pin) return callback({ error: "PIN yanlış!" });
 
         room.users[socket.id] = {
@@ -89,11 +81,14 @@ io.on("connection", (socket) => {
         socket.join(roomName);
         updateRoomUsers(roomName);
 
-        const isOwner = room.ownerId === socket.id;
-        callback({ success: true, isOwner, pinnedMessage: room.pinnedMessage });
+        callback({
+            success: true,
+            isOwner: room.ownerId === socket.id,
+            pinnedMessage: room.pinnedMessage
+        });
     });
 
-    // ODADAN AYRILMA
+    // ODADAN ÇIKIŞ
     socket.on("leaveRoom", ({ roomName }) => {
         const room = rooms[roomName];
         if (!room) return;
@@ -113,14 +108,12 @@ io.on("connection", (socket) => {
     socket.on("sendMessage", ({ roomName, username, avatar, message }) => {
         if (!rooms[roomName]) return;
 
-        const data = {
+        io.to(roomName).emit("newMessage", {
             username,
             avatar,
             message,
             timestamp: Date.now()
-        };
-
-        io.to(roomName).emit("newMessage", data);
+        });
     });
 
     // SESLİ MESAJ
@@ -162,8 +155,7 @@ io.on("connection", (socket) => {
     socket.on("kickUser", ({ roomName, userId }, callback) => {
         const room = rooms[roomName];
         if (!room) return callback({ error: "Oda bulunamadı!" });
-        if (socket.id !== room.ownerId)
-            return callback({ error: "Yetkiniz yok!" });
+        if (socket.id !== room.ownerId) return callback({ error: "Yetkiniz yok!" });
 
         if (room.users[userId]) {
             io.sockets.sockets.get(userId)?.leave(roomName);
@@ -181,26 +173,13 @@ io.on("connection", (socket) => {
     socket.on("changePin", ({ roomName, newPin }, callback) => {
         const room = rooms[roomName];
         if (!room) return callback({ error: "Oda bulunamadı!" });
-        if (socket.id !== room.ownerId)
-            return callback({ error: "Yetkiniz yok!" });
+        if (socket.id !== room.ownerId) return callback({ error: "Yetkiniz yok!" });
 
         room.pin = newPin;
         callback({ success: true });
     });
 
-    // ODA LİNKİ
-    socket.on("getRoomLink", ({ roomName }, callback) => {
-        const room = rooms[roomName];
-        if (!room) return callback({ error: "Oda bulunamadı!" });
-
-        const link = `https://yourdomain.com/?room=${encodeURIComponent(
-            roomName
-        )}`;
-
-        callback({ success: true, link });
-    });
-
-    // BAĞLANTI KESİLDİ
+    // BAĞLANTI KOPTU
     socket.on("disconnect", () => {
         for (const roomName in rooms) {
             const room = rooms[roomName];
@@ -220,6 +199,7 @@ io.on("connection", (socket) => {
     });
 });
 
+// SERVER BAŞLAT
 server.listen(PORT, () => {
     console.log("Server çalışıyor:", PORT);
 });
