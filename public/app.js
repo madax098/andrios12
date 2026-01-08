@@ -1,6 +1,10 @@
 import { io } from "https://cdn.socket.io/4.7.1/socket.io.esm.min.js";
 
-const socket = io();
+// *** EN ÖNEMLİ SATIR ***
+const socket = io("https://andrios12.onrender.com", {
+    transports: ["websocket"]
+});
+// *************************
 
 let selectedAvatar = null;
 let username = null;
@@ -43,7 +47,7 @@ function setClock() {
 setInterval(setClock, 1000);
 setClock();
 
-/* Avatar Listesi */
+/* Avatar listesi */
 const avatars = ['🧑‍💻','👩‍🎤','👨‍🚀','👩‍🍳','🧙‍♂️','👻','🐱','🐶','🐵','🦊'];
 avatars.forEach(av => {
     const span = document.createElement('span');
@@ -166,7 +170,7 @@ socket.on('typingUsers', typingUsers => {
         `${typingUsers.join(', ')} yazıyor...`;
 });
 
-/* Online kullanici */
+/* Online kullanıcılar */
 socket.on('onlineCount', count => onlineCountEl.textContent = `Online: ${count}`);
 socket.on('onlineUsers', users => onlineUsersEl.textContent = users.join(', '));
 
