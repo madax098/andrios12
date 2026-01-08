@@ -1,6 +1,8 @@
 import { io } from "https://cdn.socket.io/4.7.1/socket.io.esm.min.js";
 
-const socket = io("https://andrios12.onrender.com");
+const socket = io("https://andrios12.onrender.com", {
+    transports: ["websocket"]
+});
 
 let selectedAvatar = null;
 let username = null;
@@ -35,14 +37,13 @@ const onlineUsersEl = document.getElementById('onlineUsers');
 const typingStatusEl = document.getElementById('typingStatus');
 const clockEl = document.getElementById('clock');
 
-/* Saat */
 function setClock() {
     const now = new Date();
     clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 setInterval(setClock, 1000);
+setClock();
 
-/* Avatar listesi */
 const avatars = ['🧑‍💻','👩‍🎤','👨‍🚀','👩‍🍳','🧙‍♂️','👻','🐱','🐶','🐵','🦊'];
 avatars.forEach(av => {
     const span = document.createElement('span');
@@ -56,10 +57,9 @@ avatars.forEach(av => {
     avatarListEl.appendChild(span);
 });
 
-/* Login */
 btnLogin.onclick = () => {
-    if (!selectedAvatar) return alert('Avatar seç!');
-    if (!usernameInput.value.trim()) return alert('İsim yaz!');
+    if (!selectedAvatar) return alert('Lütfen avatar seçin!');
+    if (!usernameInput.value.trim()) return alert('Lütfen isim yazın!');
 
     username = usernameInput.value.trim();
 
@@ -67,7 +67,6 @@ btnLogin.onclick = () => {
     mainMenu.classList.remove('hidden');
 };
 
-/* Menü */
 document.getElementById('btnCreateRoom').onclick = () => {
     mainMenu.classList.add('hidden');
     createRoomScreen.classList.remove('hidden');
@@ -86,12 +85,10 @@ document.querySelectorAll('.btnBack').forEach(btn => {
     };
 });
 
-/* Oda oluştur */
 document.getElementById('btnCreateRoomConfirm').onclick = () => {
     const roomName = roomNameInput.value.trim();
     const pin = roomPinInput.value.trim();
-
-    if (!roomName || !pin) return alert('Oda + PIN zorunlu');
+    if (!roomName || !pin) return alert('Oda adı ve PIN zorunlu!');
 
     socket.emit('createRoom', { roomName, pin, username, avatar: selectedAvatar }, (res) => {
         if (res.error) return alert(res.error);
@@ -102,12 +99,10 @@ document.getElementById('btnCreateRoomConfirm').onclick = () => {
     });
 };
 
-/* Odaya katıl */
 document.getElementById('btnJoinRoomConfirm').onclick = () => {
     const roomName = joinRoomNameInput.value.trim();
     const pin = joinRoomPinInput.value.trim();
-
-    if (!roomName || !pin) return alert('Oda + PIN zorunlu');
+    if (!roomName || !pin) return alert('Oda adı ve PIN zorunlu!');
 
     socket.emit('joinRoom', { roomName, pin, username, avatar: selectedAvatar }, (res) => {
         if (res.error) return alert(res.error);
@@ -128,7 +123,6 @@ function openChat() {
     messagesEl.innerHTML = "";
 }
 
-/* Mesaj gönder */
 btnSendMessage.onclick = sendMessage;
 messageInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') sendMessage();
@@ -143,7 +137,6 @@ function sendMessage() {
     sendTyping(false);
 }
 
-/* Yeni mesaj */
 socket.on('newMessage', data => {
     const div = document.createElement('div');
     div.innerHTML = `<strong>${data.avatar} ${data.username}:</strong> ${data.message}`;
@@ -151,7 +144,6 @@ socket.on('newMessage', data => {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 });
 
-/* Yazıyor bildirimi */
 messageInput.addEventListener('input', () => {
     sendTyping(messageInput.value.trim().length > 0);
 });
@@ -160,7 +152,6 @@ function sendTyping(isTyping) {
     socket.emit('typing', { roomName: currentRoom, isTyping });
 }
 
-/* Typing listesi */
 socket.on('typingUsers', typingUsers => {
     typingStatusEl.textContent =
         typingUsers.length === 0 ? '' :
@@ -168,22 +159,59 @@ socket.on('typingUsers', typingUsers => {
         `${typingUsers.join(', ')} yazıyor...`;
 });
 
-/* Online kullanıcılar */
-socket.on('onlineCount', count =>
-    onlineCountEl.textContent = `Online: ${count}`
-);
+socket.on('onlineCount', count => onlineCountEl.textContent = `Online: ${count}`);
+socket.on('onlineUsers', users => onlineUsersEl.textContent = users.join(', '));
 
-socket.on('onlineUsers', users =>
-    onlineUsersEl.textContent = users.join(', ')
-);
-
-/* Odadan çık */
 btnLeaveRoom.onclick = () => {
     socket.emit('leaveRoom', { roomName: currentRoom });
-
     currentRoom = null;
     isRoomOwner = false;
 
     chatScreen.classList.add('hidden');
     mainMenu.classList.remove('hidden');
 };
+
+let mediaRecorder;
+let audioChunks = [];
+
+const btnRecord = document.createElement('button');
+btnRecord.textContent = "Ses Kaydet";
+btnRecord.classList.add("btnRecord");
+document.getElementById('chatInputArea').appendChild(btnRecord);
+
+btnRecord.onclick = async () => {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.start();
+
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                socket.emit('sendVoiceMessage', {
+                    roomName: currentRoom,
+                    username,
+                    avatar: selectedAvatar,
+                    audioBlob: reader.result
+                });
+            };
+            reader.readAsDataURL(audioBlob);
+        };
+
+        btnRecord.textContent = "Kaydı Durdur";
+    } else {
+        mediaRecorder.stop();
+        btnRecord.textContent = "Ses Kaydet";
+    }
+};
+
+socket.on('newVoiceMessage', ({ username, avatar, audioBlob }) => {
+    const div = document.createElement('div');
+    div.innerHTML = `<strong>${avatar} ${username}:</strong> <audio controls src="${audioBlob}"></audio>`;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+});
