@@ -48,8 +48,7 @@ const avatars = ['🧑‍💻','👩‍🎤','👨‍🚀','👩‍🍳','🧙�
 avatars.forEach(av => {
     const span = document.createElement('span');
     span.textContent = av;
-    span.style.cursor = 'pointer';
-    span.style.fontSize = '30px';
+    span.classList.add("avatarItem");
     span.onclick = () => {
         selectedAvatar = av;
         document.querySelectorAll('#avatarList span').forEach(s => s.classList.remove('selected'));
@@ -58,7 +57,7 @@ avatars.forEach(av => {
     avatarListEl.appendChild(span);
 });
 
-/* Login */
+/* LOGIN */
 btnLogin.onclick = () => {
     if (!selectedAvatar) return alert('Lütfen avatar seçin!');
     if (!usernameInput.value.trim()) return alert('Lütfen isim yazın!');
@@ -69,7 +68,7 @@ btnLogin.onclick = () => {
     mainMenu.classList.remove('hidden');
 };
 
-/* Menü butonları */
+/* Menü */
 document.getElementById('btnCreateRoom').onclick = () => {
     mainMenu.classList.add('hidden');
     createRoomScreen.classList.remove('hidden');
@@ -92,10 +91,11 @@ document.querySelectorAll('.btnBack').forEach(btn => {
 document.getElementById('btnCreateRoomConfirm').onclick = () => {
     const roomName = roomNameInput.value.trim();
     const pin = roomPinInput.value.trim();
-    if (!roomName || !pin) return alert('Oda ve PIN şart');
+    if (!roomName || !pin) return alert('Oda ve PIN şart!');
 
     socket.emit('createRoom', { roomName, pin, username, avatar: selectedAvatar }, (res) => {
         if (res.error) return alert(res.error);
+
         currentRoom = roomName;
         isRoomOwner = true;
         openChat();
@@ -106,17 +106,17 @@ document.getElementById('btnCreateRoomConfirm').onclick = () => {
 document.getElementById('btnJoinRoomConfirm').onclick = () => {
     const roomName = joinRoomNameInput.value.trim();
     const pin = joinRoomPinInput.value.trim();
-    if (!roomName || !pin) return alert('Oda ve PIN şart');
+    if (!roomName || !pin) return alert('Oda ve PIN şart!');
 
     socket.emit('joinRoom', { roomName, pin, username, avatar: selectedAvatar }, (res) => {
         if (res.error) return alert(res.error);
+
         currentRoom = roomName;
         isRoomOwner = false;
         openChat();
     });
 };
 
-/* Odayı aç */
 function openChat() {
     createRoomScreen.classList.add('hidden');
     joinRoomScreen.classList.add('hidden');
@@ -124,23 +124,25 @@ function openChat() {
 
     chatScreen.classList.remove('hidden');
     chatRoomName.textContent = currentRoom;
-    messagesEl.innerHTML = '';
+    messagesEl.innerHTML = "";
 }
 
 /* Mesaj gönder */
 btnSendMessage.onclick = sendMessage;
-messageInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+messageInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage();
+});
 
 function sendMessage() {
     const message = messageInput.value.trim();
     if (!message) return;
 
     socket.emit('sendMessage', { roomName: currentRoom, username, avatar: selectedAvatar, message });
-    messageInput.value = '';
+    messageInput.value = "";
     sendTyping(false);
 }
 
-/* Yeni mesaj */
+/* Mesaj alma */
 socket.on('newMessage', data => {
     const div = document.createElement('div');
     div.innerHTML = `<strong>${data.avatar} ${data.username}:</strong> ${data.message}`;
@@ -148,7 +150,7 @@ socket.on('newMessage', data => {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 });
 
-/* Yazıyor göstergesi */
+/* Yazıyor */
 messageInput.addEventListener('input', () => {
     sendTyping(messageInput.value.trim().length > 0);
 });
@@ -164,7 +166,7 @@ socket.on('typingUsers', typingUsers => {
         `${typingUsers.join(', ')} yazıyor...`;
 });
 
-/* Online kullanıcı bilgisi */
+/* Online kullanici */
 socket.on('onlineCount', count => onlineCountEl.textContent = `Online: ${count}`);
 socket.on('onlineUsers', users => onlineUsersEl.textContent = users.join(', '));
 
@@ -183,8 +185,8 @@ let mediaRecorder;
 let audioChunks = [];
 
 const btnRecord = document.createElement('button');
-btnRecord.textContent = 'Ses Kaydet';
-btnRecord.style.marginLeft = '10px';
+btnRecord.textContent = "Ses Kaydet";
+btnRecord.classList.add("btnRecord");
 document.getElementById('chatInputArea').appendChild(btnRecord);
 
 btnRecord.onclick = async () => {
@@ -217,7 +219,6 @@ btnRecord.onclick = async () => {
     }
 };
 
-/* Sesli mesaj al */
 socket.on('newVoiceMessage', ({ username, avatar, audioBlob }) => {
     const div = document.createElement('div');
     div.innerHTML = `<strong>${avatar} ${username}:</strong> <audio controls src="${audioBlob}"></audio>`;
