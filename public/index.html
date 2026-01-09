@@ -65,13 +65,12 @@
     <div id="chatInputArea">
         <input id="messageInput" type="text" placeholder="Mesaj yazın..." autocomplete="off" />
         <button id="btnSendMessage">Gönder</button>
-        <!-- Ses kaydı butonu JS tarafında eklenecek -->
     </div>
 </div>
 
+<!-- Firebase (gerekliyse) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  // Firebase SDK'ları istersen buraya import edebilirsin
 
   const firebaseConfig = {
     apiKey: "AIzaSyDMyIPNR5uKBVgLd_0kik3pCiZVg-4efHg",
@@ -83,10 +82,10 @@
   };
 
   const app = initializeApp(firebaseConfig);
-
-  // Firebase ile ilgili fonksiyonları burada kullanabilirsin
 </script>
 
+<!-- UYGULAMANIN ASIL KODU -->
 <script type="module" src="app.js"></script>
+
 </body>
 </html>
