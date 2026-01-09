@@ -10,7 +10,8 @@ const io = new Server(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    path: "/socket.io"
 });
 
 // Render PORT düzeltmesi (EN ÖNEMLİ KISIM)
@@ -198,7 +199,6 @@ io.on("connection", (socket) => {
         console.log("Kullanıcı ayrıldı:", socket.id);
     });
 });
-
 // SERVER BAŞLAT
 server.listen(PORT, () => {
     console.log("Server çalışıyor:", PORT);
