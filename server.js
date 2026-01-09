@@ -14,7 +14,7 @@ const io = new Server(server, {
     path: "/socket.io"
 });
 
-// Render PORT düzeltmesi (EN ÖNEMLİ KISIM)
+// Render PORT düzeltmesi
 const PORT = process.env.PORT || 3000;
 
 // Tüm odalar
@@ -26,7 +26,6 @@ function updateRoomUsers(roomName) {
     if (!room) return;
 
     const users = Object.values(room.users).map(u => u.username);
-
     io.to(roomName).emit("onlineUsers", users);
     io.to(roomName).emit("onlineCount", users.length);
 }
@@ -61,7 +60,6 @@ io.on("connection", (socket) => {
 
         socket.join(roomName);
         updateRoomUsers(roomName);
-
         callback({ success: true });
     });
 
@@ -128,17 +126,7 @@ io.on("connection", (socket) => {
         });
     });
 
-    // MESAJ SABİTLEME
-    socket.on("pinMessage", ({ roomName, messageId, message }) => {
-        const room = rooms[roomName];
-        if (!room) return;
-        if (socket.id !== room.ownerId) return;
-
-        room.pinnedMessage = { messageId, message };
-        io.to(roomName).emit("pinnedMessage", room.pinnedMessage);
-    });
-
-    // YAZIYOR BİLDİRİMİ
+    // YAZIYOR
     socket.on("typing", ({ roomName, isTyping }) => {
         const room = rooms[roomName];
         if (!room || !room.users[socket.id]) return;
@@ -150,34 +138,6 @@ io.on("connection", (socket) => {
             .map((u) => u.username);
 
         io.to(roomName).emit("typingUsers", typingUsers);
-    });
-
-    // KULLANICI ATMA
-    socket.on("kickUser", ({ roomName, userId }, callback) => {
-        const room = rooms[roomName];
-        if (!room) return callback({ error: "Oda bulunamadı!" });
-        if (socket.id !== room.ownerId) return callback({ error: "Yetkiniz yok!" });
-
-        if (room.users[userId]) {
-            io.sockets.sockets.get(userId)?.leave(roomName);
-            delete room.users[userId];
-            updateRoomUsers(roomName);
-
-            io.to(roomName).emit("userKicked", userId);
-            return callback({ success: true });
-        }
-
-        callback({ error: "Kullanıcı bulunamadı!" });
-    });
-
-    // PIN DEĞİŞTİRME
-    socket.on("changePin", ({ roomName, newPin }, callback) => {
-        const room = rooms[roomName];
-        if (!room) return callback({ error: "Oda bulunamadı!" });
-        if (socket.id !== room.ownerId) return callback({ error: "Yetkiniz yok!" });
-
-        room.pin = newPin;
-        callback({ success: true });
     });
 
     // BAĞLANTI KOPTU
@@ -199,6 +159,7 @@ io.on("connection", (socket) => {
         console.log("Kullanıcı ayrıldı:", socket.id);
     });
 });
+
 // SERVER BAŞLAT
 server.listen(PORT, () => {
     console.log("Server çalışıyor:", PORT);
